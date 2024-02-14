@@ -13,17 +13,19 @@ struct EditPanelOption {
     var Saturation: Double
     var Contraste: Double
     var Luminosite: Double
+    var autofilter: Double
     
-    init(Coloration: Double = 0.0, Saturation: Double = 0.0, Contraste: Double = 0.0, Luminosite: Double = 0.0) {
+    init(Coloration: Double = 0.0, Saturation: Double = 0.0, Contraste: Double = 0.0, Luminosite: Double = 0.0, autofilter: Double = 0.0) {
         self.Coloration = Coloration
         self.Saturation = Saturation
         self.Contraste = Contraste
         self.Luminosite = Luminosite
+        self.autofilter = autofilter
     }
 }
 
-func EPO (a: Double, b: Double, c: Double, d: Double) -> EditPanelOption{
-    return EditPanelOption(Coloration: a, Saturation: b, Contraste: c, Luminosite: d)
+func EPO (a: Double, b: Double, c: Double, d: Double, e: Double) -> EditPanelOption{
+    return EditPanelOption(Coloration: a, Saturation: b, Contraste: c, Luminosite: d, autofilter: e)
 }
 
 
@@ -33,8 +35,15 @@ struct EditPanelView: View {
     @Binding var imageFilter: NSImage
     @Binding var imageName: URL?
     
+    @State var autoFilterName = ""
+    @State var filterNames = [
+            "CIBoxBlur", "CIDiscBlur", "CIGaussianBlur", "CIMaskedVariableBlur",
+            "CIMedianFilter", "CIMotionBlur", "CINoiseReduction", "CIZoomBlur"
+        ]
+    @State private var selectedFilter = "CIBoxBlur"
+    
     init(sliderValue: Binding<Double> = .constant(0.0),
-         OptionValue: Binding<EditPanelOption> = .constant(EPO(a: 0.0, b: 0.0, c: 0.0, d: 0.0)),
+         OptionValue: Binding<EditPanelOption> = .constant(EPO(a: 0.0, b: 0.0, c: 0.0, d: 0.0, e: 0.0)),
          imageFilter: Binding<NSImage> = .constant(NSImage()),
          imageName: Binding<URL?> = .constant(URL(string: "")!)
     )
@@ -141,6 +150,34 @@ struct EditPanelView: View {
                 Text(String(round(OptionValue.Luminosite)))
                     .foregroundColor(.white)
             }
+            Picker("Auto Filter", selection: $selectedFilter) {
+                            ForEach(filterNames, id: \.self) { filterName in
+                                Text(filterName)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .padding()
+            Slider(value: $OptionValue.autofilter, in: 0.0...100.0)
+                .padding(.leading, 15)
+                .accentColor(Color.blue) // Change the slider's thumb color
+                .frame(width: 130)
+            HStack {
+                Spacer()
+                Button("Apply Filter") {
+                    
+                        print(selectedFilter)
+                        
+                        // Replace [name of the filter] with the selected filter
+                    let img_out = autoFilter(intensity: Float(OptionValue.autofilter), name: imageName!, filter: selectedFilter)
+                        let rep = NSCIImageRep(ciImage: img_out)
+                        let nsImage = NSImage(size: rep.size)
+                        nsImage.addRepresentation(rep)
+                        
+                        imageFilter = nsImage
+                    
+                }.padding(.trailing, 15)
+            }
+            
             Button(action: {
                 
             }, label: {

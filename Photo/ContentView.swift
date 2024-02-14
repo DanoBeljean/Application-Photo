@@ -10,6 +10,12 @@
 
 import SwiftUI
 
+struct detailView: View {
+    var body: some View {
+        Text("jhlé")
+    }
+}
+
 func saveImageToFile(image: NSImage, title: String) {
     
     guard let imageData = image.tiffRepresentation,
@@ -64,6 +70,20 @@ extension NSImage {
     }
 }
 
+
+struct BlurView: NSViewRepresentable {
+    func makeNSView(context: NSViewRepresentableContext<BlurView>) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.blendingMode = .behindWindow
+        view.material = .light
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: NSViewRepresentableContext<BlurView>) {
+        // Update the view if needed
+    }
+}
+
 struct ContentView: View {
     @Binding var img: URL?
     @State var isGeometryPresented = false
@@ -95,6 +115,7 @@ struct ContentView: View {
     @State private var scale: CGFloat = 1.0
     
     @State var presentAlert = false
+    @State var text = ""
     
     @State private var imagePosition = CGSize(width: -50, height: 0)
     @State var isEditMode = false
@@ -163,12 +184,20 @@ struct ContentView: View {
             }
             else {
                 Text(img!.absoluteString.dropFirst(7))
+                
                 Text("Image not found")
             }
             // Image(nsImage: NSImageFilter)
             
             /* end image displaying */
-            
+            /*
+            if #available(macOS 13.0, *) {
+                NavigationView {
+                            // Your navigation content here
+                        }
+                        .background(BlurView()) // Apply a background blur
+                        .edgesIgnoringSafeArea(.all)
+            }*/
             Spacer()
             
             if isEditMode {
